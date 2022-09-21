@@ -117,6 +117,9 @@ void IsolateSafepoint::InitiateGlobalSafepointScopeRaw(
     V8::GetCurrentPlatform()
         ->GetForegroundTaskRunner(reinterpret_cast<v8::Isolate*>(isolate()))
         ->PostTask(std::make_unique<GlobalSafepointInterruptTask>(heap_));
+
+    // Request an interrupt in case of long-running code.
+    isolate()->stack_guard()->RequestGlobalSafepoint();
   }
 }
 
@@ -303,7 +306,6 @@ void GlobalSafepoint::AppendClient(Isolate* client) {
   client->global_safepoint_next_client_isolate_ = clients_head_;
 
   clients_head_ = client;
-  client->shared_isolate_ = shared_isolate_;
 }
 
 void GlobalSafepoint::RemoveClient(Isolate* client) {
@@ -332,7 +334,14 @@ void GlobalSafepoint::RemoveClient(Isolate* client) {
   client->shared_isolate_ = nullptr;
 }
 
-void GlobalSafepoint::AssertNoClients() { DCHECK_NULL(clients_head_); }
+void GlobalSafepoint::AssertNoClientsOnTearDown() {
+  DCHECK_WITH_MSG(
+      clients_head_ == nullptr,
+      "Shared heap must not have clients at teardown. The first isolate that "
+      "is created (in a process that has no isolates) owns the lifetime of the "
+      "shared heap and is considered the main isolate. The main isolate must "
+      "outlive all other isolates.");
+}
 
 void GlobalSafepoint::EnterGlobalSafepointScope(Isolate* initiator) {
   // Safepoints need to be initiated on some main thread.

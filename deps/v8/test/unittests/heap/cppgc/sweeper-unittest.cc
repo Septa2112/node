@@ -49,6 +49,7 @@ class SweeperTest : public testing::TestWithHeap {
     // methods are called in the right order.
     heap->stats_collector()->NotifyMarkingStarted(
         GarbageCollector::Config::CollectionType::kMajor,
+        GarbageCollector::Config::MarkingType::kAtomic,
         GarbageCollector::Config::IsForcedGC::kNotForced);
     heap->stats_collector()->NotifyMarkingCompleted(0);
     const Sweeper::SweepingConfig sweeping_config{
@@ -261,13 +262,13 @@ TEST_F(SweeperTest, UnmarkObjects) {
 
   Sweep();
 
-#if !defined(CPPGC_YOUNG_GENERATION)
-  EXPECT_FALSE(normal_object_header.IsMarked());
-  EXPECT_FALSE(large_object_header.IsMarked());
-#else
-  EXPECT_TRUE(normal_object_header.IsMarked());
-  EXPECT_TRUE(large_object_header.IsMarked());
-#endif
+  if (Heap::From(GetHeap())->generational_gc_supported()) {
+    EXPECT_TRUE(normal_object_header.IsMarked());
+    EXPECT_TRUE(large_object_header.IsMarked());
+  } else {
+    EXPECT_FALSE(normal_object_header.IsMarked());
+    EXPECT_FALSE(large_object_header.IsMarked());
+  }
 }
 
 TEST_F(SweeperTest, LazySweepingDuringAllocation) {
@@ -337,7 +338,10 @@ TEST_F(SweeperTest, LazySweepingNormalPages) {
       Heap::Config::CollectionType::kMajor,
       Heap::Config::StackState::kNoHeapPointers,
       Heap::Config::MarkingType::kAtomic,
-      Heap::Config::SweepingType::kIncrementalAndConcurrent};
+      // Sweeping type must not include concurrent as that could lead to the
+      // concurrent sweeper holding onto pages in rare cases which delays
+      // reclamation of objects.
+      Heap::Config::SweepingType::kIncremental};
   Heap::From(GetHeap())->CollectGarbage(config);
   EXPECT_EQ(0u, g_destructor_callcount);
   MakeGarbageCollected<GCedObject>(GetAllocationHandle());
