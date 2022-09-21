@@ -285,11 +285,6 @@
             '<(V8_ROOT)/src/builtins/arm64/builtins-arm64.cc',
           ],
         }],
-        ['v8_target_arch=="mips" or v8_target_arch=="mipsel"', {
-          'sources': [
-            '<(V8_ROOT)/src/builtins/mips/builtins-mips.cc',
-          ],
-        }],
         ['v8_target_arch=="riscv64" or v8_target_arch=="riscv64"', {
           'sources': [
             '<(V8_ROOT)/src/builtins/riscv/builtins-riscv.cc',
@@ -641,11 +636,6 @@
               }],
             ],
           }],
-          ['v8_target_arch=="mips" or v8_target_arch=="mipsel"', {
-            'sources': [
-              '<!@pymod_do_main(GN-scraper "<(V8_ROOT)/BUILD.gn"  "v8_header_set.\\"v8_internal_headers\\".*?v8_current_cpu == \\"mips\\".*?sources \\+= ")',
-            ],
-          }],
           ['v8_target_arch=="mips64" or v8_target_arch=="mips64el"', {
             'sources': [
               '<!@pymod_do_main(GN-scraper "<(V8_ROOT)/BUILD.gn"  "v8_header_set.\\"v8_internal_headers\\".*?v8_current_cpu == \\"mips64\\".*?sources \\+= ")',
@@ -891,11 +881,6 @@
             }],
           ],
         }],
-        ['v8_target_arch=="mips" or v8_target_arch=="mipsel"', {
-          'sources': [
-            '<!@pymod_do_main(GN-scraper "<(V8_ROOT)/BUILD.gn"  "\\"v8_base_without_compiler.*?v8_current_cpu == \\"mips\\".*?sources \\+= ")',
-          ],
-        }],
         ['v8_target_arch=="mips64" or v8_target_arch=="mips64el"', {
           'sources': [
             '<!@pymod_do_main(GN-scraper "<(V8_ROOT)/BUILD.gn"  "\\"v8_base_without_compiler.*?v8_current_cpu == \\"mips64\\".*?sources \\+= ")',
@@ -993,7 +978,7 @@
         }],
         # Platforms that don't have Compare-And-Swap (CAS) support need to link atomic library
         # to implement atomic memory access
-        ['v8_current_cpu in ["mips", "mipsel", "mips64", "mips64el", "ppc", "arm", "riscv64", "loong64"]', {
+        ['v8_current_cpu in ["mips64", "mips64el", "ppc", "arm", "riscv64", "loong64"]', {
           'link_settings': {
             'libraries': ['-latomic', ],
           },
@@ -1204,7 +1189,7 @@
             ],
           },
         }],
-        ['target_arch == "mips" or OS == "mips64"', {
+        ['OS == "mips64"', {
           # here just for 'BUILD.gn' sync
           # 'data': [
           #   '<(V8_ROOT)/tools/mips_toolchain/sysroot/usr/lib/',
@@ -1650,11 +1635,6 @@
                   '<(V8_ROOT)/src/heap/base/asm/s390/push_registers_asm.cc',
                 ],
               }],
-              ['_toolset == "host" and host_arch == "mips" or _toolset == "target" and target_arch=="mips" or _toolset == "host" and host_arch == "mipsel" or _toolset == "target" and target_arch=="mipsel"', {
-                'sources': [
-                  '<(V8_ROOT)/src/heap/base/asm/mips/push_registers_asm.cc',
-                ],
-              }],
               ['_toolset == "host" and host_arch == "mips64" or _toolset == "target" and target_arch=="mips64" or _toolset == "host" and host_arch == "mips64el" or _toolset == "target" and target_arch=="mips64el"', {
                 'sources': [
                   '<(V8_ROOT)/src/heap/base/asm/mips64/push_registers_asm.cc',
@@ -1787,8 +1767,7 @@
             ]
           },
           'conditions': [
-            ['v8_target_arch=="mips" or v8_target_arch=="mipsel" \
-              or v8_target_arch=="mips64" or v8_target_arch=="mips64el"', {
+            ['v8_target_arch=="mips64" or v8_target_arch=="mips64el"', {
               'v8_dump_build_config_args': [
                 'mips_arch_variant=<(mips_arch_variant)',
                 'mips_use_msa=<(mips_use_msa)',

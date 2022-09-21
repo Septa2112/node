@@ -227,10 +227,6 @@
     # Sets -DV8_ENABLE_SANDBOX.
     'v8_enable_sandbox%': 0,
 
-    # Enable external pointer sandboxing. Requires v8_enable_sandbox.
-    # Sets -DV8_SANDBOXED_EXTERNAL_POINRTERS.
-    'v8_enable_sandboxed_external_pointers%': 0,
-
     # Experimental feature for collecting per-class zone memory stats.
     # Requires use_rtti = true
     'v8_enable_precise_zone_stats%': 0,
@@ -329,9 +325,6 @@
       }],
       ['v8_enable_sandbox==1', {
         'defines': ['V8_ENABLE_SANDBOX',],
-      }],
-      ['v8_enable_sandboxed_external_pointers==1', {
-        'defines': ['V8_SANDBOXED_EXTERNAL_POINTERS',],
       }],
       ['v8_enable_object_print==1', {
         'defines': ['OBJECT_PRINT',],
